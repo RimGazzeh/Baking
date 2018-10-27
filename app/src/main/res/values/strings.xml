@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Baking</string>
+    <string name="no_network_connection">Oops!! no Network connection</string>
+    <string name="error_message">No data to display. Please try again.</string>
+    <string name="appwidget_text">Recipes</string>
+    <string name="add_widget">Add widget</string>
+    <string name="ingredients_title">Ingredients</string>
+    <string name="steps_title">Steps</string>
+    <string name="no_saved_recipe">No dessert saved</string>
+
+</resources>
