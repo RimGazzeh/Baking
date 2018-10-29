@@ -41,6 +41,7 @@ public class StepDetailFragment extends Fragment implements Player.EventListener
 
 
     private static final String STEP_EXTRA = "step_extra";
+    private static final String PLAYING_STATE = "playing_state";
     private FragmentStepBinding mFragmentStepBinding;
     private SimpleExoPlayer mExoPlayer;
     private static MediaSessionCompat mMediaSession;
@@ -50,6 +51,7 @@ public class StepDetailFragment extends Fragment implements Player.EventListener
     private long mPlayerPosition;
     private AudioManager mAudioManager;
     private ComponentName mReceiverComponent;
+    private boolean mIsPlaying = true;
 
 
     public static StepDetailFragment newInstance(Step step) {
@@ -67,6 +69,14 @@ public class StepDetailFragment extends Fragment implements Player.EventListener
         mReceiverComponent = new ComponentName(getActivity(), MediaReceiver.class);
         mAudioManager.registerMediaButtonEventReceiver(mReceiverComponent);
         initData();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            mIsPlaying = savedInstanceState.getBoolean(PLAYING_STATE);
+        }
     }
 
     @Nullable
@@ -149,7 +159,7 @@ public class StepDetailFragment extends Fragment implements Player.EventListener
             mFragmentStepBinding.stepVideo.setPlayer(mExoPlayer);
             MediaSource mediaSource = buildMediaSource(mediaUri);
             mExoPlayer.prepare(mediaSource, true, false);
-            mExoPlayer.setPlayWhenReady(true);
+            mExoPlayer.setPlayWhenReady(mIsPlaying);
             mExoPlayer.seekTo(mPlayerPosition);
         }
     }
@@ -185,6 +195,7 @@ public class StepDetailFragment extends Fragment implements Player.EventListener
             }
         }
     }
+
     /**
      * Release the player when the fragment is destroyed.
      */
@@ -209,11 +220,19 @@ public class StepDetailFragment extends Fragment implements Player.EventListener
         if ((playbackState == Player.STATE_READY) && playWhenReady) {
             mStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
                     mExoPlayer.getCurrentPosition(), 1f);
+            mIsPlaying = true;
         } else if ((playbackState == Player.STATE_READY)) {
             mStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED,
                     mExoPlayer.getCurrentPosition(), 1f);
+            mIsPlaying = false;
         }
         mMediaSession.setPlaybackState(mStateBuilder.build());
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(PLAYING_STATE, mIsPlaying);
     }
 
     /**
